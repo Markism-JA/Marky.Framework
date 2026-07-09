@@ -5,8 +5,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="2.11.8" />
-    <PackageReference Include="StackExchange.Redis.Abstractions" Version="2.11.8" />
+    <PackageReference Include="StackExchange.Redis" Version="3.0.11" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Marky.Framework.Persistence.Abstraction\Marky.Framework.Persistence.Abstraction.csproj" />
