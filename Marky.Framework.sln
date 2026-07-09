@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DDE2300A-C0B0-4D4C-8B8E-6B8D5D1A1514}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marky.Framework.Domain", "src\Marky.Framework.Domain\Marky.Framework.Domain.csproj", "{321153C1-E355-4348-95F4-594834FDFA1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marky.Framework.Persistence.Abstraction", "src\Marky.Framework.Persistence.Abstraction\Marky.Framework.Persistence.Abstraction.csproj", "{73A3C97C-DC92-4D6D-BD66-FBA5D3E3D628}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marky.Framework.Persistence.EntityFramework", "src\Marky.Framework.Persistence.EntityFramework\Marky.Framework.Persistence.EntityFramework.csproj", "{B898C8B5-8C5E-4A2E-A78B-F4A1068B4AB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marky.Framework.Persistence.Redis", "src\Marky.Framework.Persistence.Redis\Marky.Framework.Persistence.Redis.csproj", "{D6F3EEB2-0B7A-4D97-A6A1-36FA723D0157}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{321153C1-E355-4348-95F4-594834FDFA1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{321153C1-E355-4348-95F4-594834FDFA1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{321153C1-E355-4348-95F4-594834FDFA1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{321153C1-E355-4348-95F4-594834FDFA1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73A3C97C-DC92-4D6D-BD66-FBA5D3E3D628}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73A3C97C-DC92-4D6D-BD66-FBA5D3E3D628}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73A3C97C-DC92-4D6D-BD66-FBA5D3E3D628}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73A3C97C-DC92-4D6D-BD66-FBA5D3E3D628}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B898C8B5-8C5E-4A2E-A78B-F4A1068B4AB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B898C8B5-8C5E-4A2E-A78B-F4A1068B4AB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B898C8B5-8C5E-4A2E-A78B-F4A1068B4AB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B898C8B5-8C5E-4A2E-A78B-F4A1068B4AB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6F3EEB2-0B7A-4D97-A6A1-36FA723D0157}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6F3EEB2-0B7A-4D97-A6A1-36FA723D0157}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6F3EEB2-0B7A-4D97-A6A1-36FA723D0157}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6F3EEB2-0B7A-4D97-A6A1-36FA723D0157}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{321153C1-E355-4348-95F4-594834FDFA1C} = {DDE2300A-C0B0-4D4C-8B8E-6B8D5D1A1514}
+		{73A3C97C-DC92-4D6D-BD66-FBA5D3E3D628} = {DDE2300A-C0B0-4D4C-8B8E-6B8D5D1A1514}
+		{B898C8B5-8C5E-4A2E-A78B-F4A1068B4AB3} = {DDE2300A-C0B0-4D4C-8B8E-6B8D5D1A1514}
+		{D6F3EEB2-0B7A-4D97-A6A1-36FA723D0157} = {DDE2300A-C0B0-4D4C-8B8E-6B8D5D1A1514}
+	EndGlobalSection
+EndGlobal
