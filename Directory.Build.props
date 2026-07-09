@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildThisFileDirectory)coverlet.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+  <ItemGroup Condition="Exists('Migrations')">
+    <Compile Update="Migrations\**\*.cs">
+      <Visible>true</Visible>
+      <IsGenerated>true</IsGenerated>
+    </Compile>
+  </ItemGroup>
+</Project>

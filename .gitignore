@@ -1,0 +1,59 @@
+.venv/
+.obsidian/
+site/
+
+# OS or Global
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editors
+.idea/
+.vs/
+.vscode/
+*.user/
+*.userprefs/
+*.suo
+*.cache
+*.pidb
+*.pdb
+*.mdb
+
+# jetbrains user specific
+*.DotSettings.user
+
+# logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Ignore ParrelSync clones
+*_clone
+*_clone_*
+
+[Tt]est[Rr]esults
+[Cc]overage[Rr]eport
+
+.env
+.bin
+.obj
+
+
+[Bb]in/
+[Oo]bj/
+
+*.user
+*.userosscache
+*.sln.docstates
+
+## NuGet (Package Management)
+project.assets.json
+project.nuget.cache
+*.nuget.g.props
+*.nuget.g.targets
+*.nuget.dgspec.json
+
+appsettings.Local.json
+appsettings.*.local.json
+
