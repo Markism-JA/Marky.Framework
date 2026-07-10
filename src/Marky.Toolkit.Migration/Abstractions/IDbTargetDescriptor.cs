@@ -6,6 +6,6 @@ namespace Marky.Toolkit.Migration.Abstractions;
 public interface IDbTargetDescriptor
 {
     public string TargetKey { get; }
-    public Type DbContext { get; }
+    public Type DbContextType { get; }
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration);
 }
