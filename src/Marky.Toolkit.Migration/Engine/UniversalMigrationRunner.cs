@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Marky.Toolkit.Migration.Abstractions;
 using Marky.Toolkit.Migration.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -40,25 +41,6 @@ public static class UniversalMigrationRunner
             {
                 logger.LogError(
                     "Run parameter execution key missing. Provide command token: --target=GameServer or --target=All"
-                );
-                return;
-            }
-
-            var checker = new PreFlightConnectionChecker(
-                loggerFactory.CreateLogger<PreFlightConnectionChecker>()
-            );
-            string dbHost = config["DbHost"] ?? "localhost";
-            int dbPort = int.TryParse(config["DbPort"], out var p) ? p : 5432;
-
-            logger.LogInformation(
-                "Invoking pre-flight connection check on storage boundary context {Host}:{Port}...",
-                dbHost,
-                dbPort
-            );
-            if (!await checker.IsDbBoundaryLiveAsync(dbHost, dbPort, maxRetries: 3))
-            {
-                logger.LogCritical(
-                    "Network path to database target remains unreachable. Aborting execution pipeline loop."
                 );
                 return;
             }
@@ -105,14 +87,23 @@ public static class UniversalMigrationRunner
                 .Cast<IDbTargetDescriptor>()
                 .ToList();
 
-            var executionQueue =
-                targetKey == "ALL"
-                    ? discoveredTargets
-                    : discoveredTargets
-                        .Where(t =>
-                            t.TargetKey.Equals(targetKey, StringComparison.OrdinalIgnoreCase)
-                        )
-                        .ToList();
+            List<IDbTargetDescriptor> executionQueue;
+
+            if (targetKey == "ALL")
+            {
+                executionQueue = discoveredTargets;
+            }
+            else
+            {
+                var targetKeys = targetKey
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(k => k.Trim())
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                executionQueue = discoveredTargets
+                    .Where(t => targetKeys.Contains(t.TargetKey))
+                    .ToList();
+            }
 
             if (!executionQueue.Any())
             {
@@ -121,6 +112,58 @@ public static class UniversalMigrationRunner
                     targetKey
                 );
                 return;
+            }
+
+            var checker = new PreFlightConnectionChecker(
+                loggerFactory.CreateLogger<PreFlightConnectionChecker>()
+            );
+
+            foreach (var target in executionQueue)
+            {
+                string connectionStringName = $"{target.TargetKey}Database";
+                var connectionString = config.GetConnectionString(connectionStringName);
+
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    logger.LogCritical(
+                        "A valid connection string named '{Name}' could not be resolved for target context node: '{TargetKey}'.",
+                        connectionStringName,
+                        target.TargetKey
+                    );
+                    return;
+                }
+
+                var hostMatch = Regex.Match(
+                    connectionString,
+                    @"(?:Host|Server)\s*=\s*([^;]+)",
+                    RegexOptions.IgnoreCase
+                );
+                var portMatch = Regex.Match(
+                    connectionString,
+                    @"Port\s*=\s*([0-9]+)",
+                    RegexOptions.IgnoreCase
+                );
+
+                string dbHost = hostMatch.Success ? hostMatch.Groups[1].Value.Trim() : "localhost";
+                int dbPort =
+                    portMatch.Success && int.TryParse(portMatch.Groups[1].Value, out var parsedPort)
+                        ? parsedPort
+                        : 5432;
+
+                logger.LogInformation(
+                    "Invoking provider-agnostic pre-flight connection check on node [{TargetKey}] targeting {Host}:{Port}...",
+                    target.TargetKey,
+                    dbHost,
+                    dbPort
+                );
+                if (!await checker.IsDbBoundaryLiveAsync(dbHost, dbPort, maxRetries: 3))
+                {
+                    logger.LogCritical(
+                        "Network path to database target boundary context node [{TargetKey}] remains unreachable. Aborting deployment.",
+                        target.TargetKey
+                    );
+                    return;
+                }
             }
 
             foreach (var target in executionQueue)
