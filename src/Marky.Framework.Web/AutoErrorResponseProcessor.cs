@@ -57,10 +57,21 @@ public class AutoErrorResponseProcessor : IOperationProcessor
         {
             var response = new OpenApiResponse { Description = description };
 
-            response.Schema = context.SchemaGenerator.Generate<NJsonSchema.JsonSchema>(
+            var registeredSchema = context.SchemaGenerator.Generate(
                 typeof(ErrorResponse),
                 context.SchemaResolver
             );
+
+            var absoluteReferenceSchema = new NJsonSchema.JsonSchema
+            {
+                Reference = registeredSchema,
+            };
+
+            response.Content.Add(
+                "application/json",
+                new OpenApiMediaType { Schema = absoluteReferenceSchema }
+            );
+
             operation.Responses[statusCode] = response;
         }
     }

@@ -7,6 +7,13 @@ namespace Marky.Framework.Application;
 
 public static class DependencyInjection
 {
+    public static IServiceCollection AddEnterpriseBaseDependency<TMarker>(
+        this IServiceCollection services
+    )
+    {
+        return services.AddEnterpriseBaseDependency(typeof(TMarker).Assembly);
+    }
+
     public static IServiceCollection AddEnterpriseBaseDependency(
         this IServiceCollection services,
         Assembly assembly

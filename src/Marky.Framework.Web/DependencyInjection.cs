@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Asp.Versioning;
 using Marky.Framework.Web.AccessControl;
 using MicroElements.NSwag.FluentValidation;
 using MicroElements.NSwag.FluentValidation.AspNetCore;
@@ -13,7 +14,8 @@ public static class DependencyInjection
     public static IServiceCollection AddEnterpriseWebFramework(
         this IServiceCollection services,
         string apiTitle,
-        string apiDescription
+        string apiDescription,
+        Action<ApiVersioningOptions>? configureVersioning = null
     )
     {
         services
@@ -22,6 +24,27 @@ public static class DependencyInjection
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
+
+        services
+            .AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                configureVersioning?.Invoke(options);
+            })
+            .AddMvc()
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
+        services.AddRouting(options =>
+        {
+            options.LowercaseUrls = true;
+            options.LowercaseQueryStrings = true;
+        });
 
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -38,7 +61,6 @@ public static class DependencyInjection
 
                 options.AddSecurity(
                     "JWT",
-                    Enumerable.Empty<string>(),
                     new OpenApiSecurityScheme
                     {
                         Type = OpenApiSecuritySchemeType.ApiKey,
@@ -47,10 +69,13 @@ public static class DependencyInjection
                         Description = "Type into the textbox: Bearer {your_jwt_token}.",
                     }
                 );
-                options.OperationProcessors.Add(new AutoErrorResponseProcessor());
 
-                var fluentValidationSchemaProcessor =
-                    serviceProvider.GetRequiredService<FluentValidationSchemaProcessor>();
+                options.OperationProcessors.Add(new AutoErrorResponseProcessor());
+                options.OperationProcessors.Add(new SecurityRequirementsOperationProcessor());
+
+                var fluentValidationSchemaProcessor = serviceProvider
+                    .CreateScope()
+                    .ServiceProvider.GetRequiredService<FluentValidationSchemaProcessor>();
                 options.SchemaSettings.SchemaProcessors.Add(fluentValidationSchemaProcessor);
             }
         );

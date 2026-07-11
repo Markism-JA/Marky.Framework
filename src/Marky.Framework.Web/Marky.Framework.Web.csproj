@@ -8,7 +8,8 @@
   <ItemGroup>
     <PackageReference Include="MicroElements.NSwag.FluentValidation" Version="7.1.8" />
     <PackageReference Include="NSwag.AspNetCore" Version="14.7.1" />
-
     <PackageReference Include="ErrorOr" Version="2.0.1" />
+    <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
   </ItemGroup>
 </Project>
