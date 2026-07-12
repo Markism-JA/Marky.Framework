@@ -35,11 +35,24 @@ public class UnitOfWorkManager(IServiceProvider serviceProvider, string clusterK
             var connectionGroups = registeredContexts
                 .GroupBy(c => c.Database.GetConnectionString())
                 .ToList();
+
             foreach (var group in connectionGroups)
             {
                 var contextList = group.ToList();
                 var primaryContext = contextList.First();
 
+                // 1. Force the primary context connection open to grab a stable pointer
+                await primaryContext.Database.OpenConnectionAsync(ct);
+                var sharedDbConnection = primaryContext.Database.GetDbConnection();
+
+                // 2. Enforce connection alignment across all secondary contexts in this string group
+                foreach (var secondaryContext in contextList.Skip(1))
+                {
+                    // Forces the secondary context to explicitly reuse the primary context's physical socket instance
+                    secondaryContext.Database.SetDbConnection(sharedDbConnection);
+                }
+
+                // 3. Now starting the transaction is safe because the entire pool points to the identical object pointer
                 var transaction = await primaryContext.Database.BeginTransactionAsync(ct);
                 activeTransactions.Add(transaction);
 
