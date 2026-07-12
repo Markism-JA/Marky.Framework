@@ -28,13 +28,23 @@ public static class UniversalMigrationRunner
             var environment =
                 Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development";
 
-            var config = new ConfigurationBuilder()
+            var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false)
                 .AddJsonFile($"Environments/appsettings.{environment}.json", optional: true)
                 .AddEnvironmentVariables()
-                .AddCommandLine(args)
-                .Build();
+                .AddCommandLine(args);
+
+            if (environment.Equals("Development", StringComparison.OrdinalIgnoreCase))
+            {
+                var entryAssembly = Assembly.GetEntryAssembly();
+                if (entryAssembly != null)
+                {
+                    configBuilder.AddUserSecrets(entryAssembly, optional: true);
+                }
+            }
+
+            var config = configBuilder.Build();
 
             var targetKey = config["target"]?.ToUpperInvariant();
             if (string.IsNullOrEmpty(targetKey))
@@ -120,7 +130,7 @@ public static class UniversalMigrationRunner
 
             foreach (var target in executionQueue)
             {
-                string connectionStringName = $"{target.TargetKey}Database";
+                string connectionStringName = target.TargetKey;
                 var connectionString = config.GetConnectionString(connectionStringName);
 
                 if (string.IsNullOrEmpty(connectionString))
