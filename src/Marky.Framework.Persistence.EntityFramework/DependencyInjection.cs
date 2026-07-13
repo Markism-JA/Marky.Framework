@@ -52,6 +52,12 @@ public static class DependencyInjection
             }
         );
 
+        services.TryAddScoped<DbContext>(sp => sp.GetRequiredService<TContext>());
+        services.AddKeyedScoped<DbContext, TContext>(
+            clusterKey,
+            (sp, key) => sp.GetRequiredService<TContext>()
+        );
+
         return services;
     }
 }
