@@ -1,6 +1,6 @@
 using Marky.Framework.Persistence.Abstraction;
-using Marky.Framework.Persistence.EntityFramework.Interceptor;
 using Marky.Framework.Persistence.EntityFramework.Marker;
+using Marky.Framework.Persistence.EntityFramework.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,16 +16,15 @@ public class UnitOfWorkManager(IServiceProvider serviceProvider, string clusterK
         var cacheTransactions = serviceProvider
             .GetKeyedServices<ICacheTransactional>(clusterKey)
             .ToList();
+        var redirectState = serviceProvider.GetRequiredService<OutboxRedirectState>();
 
         var primaryOutboxContext = registeredContexts.FirstOrDefault(c =>
             c is IOutboxContextMarker
         );
-        OutboxRedirectInterceptor? activeInterceptor = null;
 
         if (primaryOutboxContext is not null)
         {
-            activeInterceptor = serviceProvider.GetRequiredService<OutboxRedirectInterceptor>();
-            activeInterceptor.RedirectTo(primaryOutboxContext);
+            redirectState.EnableRedirect(primaryOutboxContext);
         }
 
         var activeTransactions = new List<IDbContextTransaction>();
@@ -41,18 +40,14 @@ public class UnitOfWorkManager(IServiceProvider serviceProvider, string clusterK
                 var contextList = group.ToList();
                 var primaryContext = contextList.First();
 
-                // 1. Force the primary context connection open to grab a stable pointer
                 await primaryContext.Database.OpenConnectionAsync(ct);
                 var sharedDbConnection = primaryContext.Database.GetDbConnection();
 
-                // 2. Enforce connection alignment across all secondary contexts in this string group
                 foreach (var secondaryContext in contextList.Skip(1))
                 {
-                    // Forces the secondary context to explicitly reuse the primary context's physical socket instance
                     secondaryContext.Database.SetDbConnection(sharedDbConnection);
                 }
 
-                // 3. Now starting the transaction is safe because the entire pool points to the identical object pointer
                 var transaction = await primaryContext.Database.BeginTransactionAsync(ct);
                 activeTransactions.Add(transaction);
 
@@ -67,7 +62,7 @@ public class UnitOfWorkManager(IServiceProvider serviceProvider, string clusterK
         {
             foreach (var tx in activeTransactions)
                 await tx.DisposeAsync();
-            activeInterceptor?.ClearRedirect();
+            redirectState.DisableRedirect();
             throw;
         }
 
@@ -75,7 +70,7 @@ public class UnitOfWorkManager(IServiceProvider serviceProvider, string clusterK
             registeredContexts,
             activeTransactions,
             cacheTransactions,
-            activeInterceptor
+            redirectState
         );
     }
 }

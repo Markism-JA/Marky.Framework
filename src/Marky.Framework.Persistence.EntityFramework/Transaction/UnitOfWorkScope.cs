@@ -1,5 +1,5 @@
 using Marky.Framework.Persistence.Abstraction;
-using Marky.Framework.Persistence.EntityFramework.Interceptor;
+using Marky.Framework.Persistence.EntityFramework.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -9,9 +9,11 @@ public class UnitOfWorkScope(
     List<DbContext> contexts,
     List<IDbContextTransaction> transactions,
     IEnumerable<ICacheTransactional> transactionalCaches,
-    OutboxRedirectInterceptor? interceptor
+    OutboxRedirectState redirectState
 ) : IUnitOfWorkScope
 {
+    private readonly OutboxRedirectState _redirectState = redirectState;
+
     public async Task CommitAsync(CancellationToken ct = default)
     {
         var contextsWithChanges = contexts.Where(c => c.ChangeTracker.HasChanges()).ToList();
@@ -36,14 +38,13 @@ public class UnitOfWorkScope(
 
             foreach (var cache in transactionalCaches)
             {
-                // Assuming your interface exposes a way to clear or abort changes
                 cache.ClearBufferedChanges();
             }
             throw;
         }
         finally
         {
-            interceptor?.ClearRedirect();
+            _redirectState.DisableRedirect();
         }
 
         // Database verified safe. Execute parallel cache execution pipelines.
@@ -53,9 +54,16 @@ public class UnitOfWorkScope(
 
     public async Task RollbackAsync(CancellationToken ct = default)
     {
-        foreach (var transaction in transactions)
+        try
         {
-            await transaction.RollbackAsync(ct);
+            foreach (var transaction in transactions)
+            {
+                await transaction.RollbackAsync(ct);
+            }
+        }
+        finally
+        {
+            _redirectState.DisableRedirect();
         }
 
         foreach (var cache in transactionalCaches)
@@ -83,7 +91,7 @@ public class UnitOfWorkScope(
 
     public async ValueTask DisposeAsync()
     {
-        interceptor?.ClearRedirect();
+        _redirectState?.DisableRedirect();
         foreach (var transaction in transactions)
         {
             await transaction.DisposeAsync();
