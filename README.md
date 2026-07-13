@@ -6,6 +6,7 @@ A monorepo housing foundational .NET infrastructure library for distributed syst
 
 ### Persistence Engine
 
+- **Universal Schema Migration & Orchestration Engine(`Toolkit.Migration`)** A provider-agnostic execution runner that decouples environment-specific data initializing loops from core application runtimes. It handles zero-allocation pre-flight TCP socket connectivity validation, automated database setup strategies (DropAndRecreate sandboxes vs. sequential production ApplyMigrations), and executes type-safe, reflection-driven data seeding pipelines sequentially within atomic transaction boundaries.
 - **Multi-Context Transaction Engine:** Layered on top of `Entity Framework Core` to coordinate atomic, single-pass persistence synchronization across multi-database environments and distinct context boundaries.
 - **Domain Lifecycle Core:** A set of lightweight, base domain contracts (`IAuditable`, `ISoftDelete`) that automate record chronological auditing and global read-filtering logic.
 - **Transactional Memory Broker:** An extension of `StackExchange.Redis` that interfaces directly with the transaction engine to provide high-velocity write-behind caching pipelines and distributed locking mechanism wrappers.

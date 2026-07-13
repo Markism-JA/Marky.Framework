@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Marky.Framework.Application/Marky.Framework.Application.csproj" />
+    <Project Path="src/Marky.Framework.Domain/Marky.Framework.Domain.csproj" />
+    <Project Path="src/Marky.Framework.Persistence.Abstraction/Marky.Framework.Persistence.Abstraction.csproj" />
+    <Project Path="src/Marky.Framework.Persistence.EntityFramework/Marky.Framework.Persistence.EntityFramework.csproj" />
+    <Project Path="src/Marky.Framework.Persistence.Redis/Marky.Framework.Persistence.Redis.csproj" />
+    <Project Path="src/Marky.Framework.Web/Marky.Framework.Web.csproj" />
+    <Project Path="src/Marky.Toolkit.Migration/Marky.Toolkit.Migration.csproj" />
+  </Folder>
+</Solution>
