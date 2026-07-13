@@ -6,6 +6,7 @@ using Marky.Framework.Persistence.EntityFramework.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace Marky.Framework.Persistence.EntityFramework;
 
@@ -35,27 +36,28 @@ public static class DependencyInjection
     )
         where TContext : DbContext
     {
-        services.AddKeyedScoped<DbContext, TContext>(
-            clusterKey,
-            (sp, key) =>
+        services.AddDbContext<TContext>(
+            (sp, optionsBuilder) =>
             {
-                var optionsBuilder = new DbContextOptionsBuilder<TContext>();
                 optionsAction(optionsBuilder);
+                var environment = sp.GetRequiredService<IHostEnvironment>();
 
+                if (environment.IsDevelopment())
+                {
+                    optionsBuilder.EnableSensitiveDataLogging();
+                    optionsBuilder.EnableDetailedErrors();
+                }
                 optionsBuilder.AddInterceptors(
                     sp.GetRequiredService<PersistenceAuditInterceptor>(),
                     sp.GetRequiredService<OutboxRedirectInterceptor>()
                 );
-
-                return (TContext)
-                    ActivatorUtilities.CreateInstance(sp, typeof(TContext), optionsBuilder.Options);
             }
         );
 
         services.TryAddScoped<DbContext>(sp => sp.GetRequiredService<TContext>());
         services.AddKeyedScoped<DbContext, TContext>(
             clusterKey,
-            (sp, key) => sp.GetRequiredService<TContext>()
+            (sp, _) => sp.GetRequiredService<TContext>()
         );
 
         return services;
